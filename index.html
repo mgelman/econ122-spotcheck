@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+  *, *::before, *::after { box-sizing:border-box; }
+  [hidden] { display:none !important; }
+  img { max-width:100%; }
+  :root { color-scheme:light dark; }
+</style>
+<title>ECON 122 Spot Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=JetBrains+Mono:wght@400;600&display=swap">
+
+<style>
+  :root {
+    --paper:#eef1f5; --card:#ffffff; --raise:#f7f9fb;
+    --ink:#0f1319; --muted:#5b6575; --faint:#8b95a5;
+    --line:#dce2ea; --line-2:#c6cfdb;
+    --accent:#4b4fd6; --accent-ink:#ffffff; --accent-soft:#e8e9fb;
+    --s0:#b23a30; --s1:#946200; --s2:#1c7a52;
+    --s0-bg:#fbeceb; --s1-bg:#fbf2df; --s2-bg:#e6f5ee;
+    --ok:#1c7a52; --warn:#946200; --bad:#b23a30;
+    --shadow:0 1px 2px rgba(16,22,34,.05), 0 8px 24px -12px rgba(16,22,34,.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:#0d1016; --card:#161b23; --raise:#1d232c;
+      --ink:#e7ecf3; --muted:#98a3b3; --faint:#6e7988;
+      --line:#242b36; --line-2:#333c4a;
+      --accent:#8f95ff; --accent-ink:#10131a; --accent-soft:#232744;
+      --s0:#ff8279; --s1:#e8b243; --s2:#5fcf95;
+      --s0-bg:#2b1a1a; --s1-bg:#2a2314; --s2-bg:#152a20;
+      --ok:#5fcf95; --warn:#e8b243; --bad:#ff8279;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#0d1016; --card:#161b23; --raise:#1d232c;
+    --ink:#e7ecf3; --muted:#98a3b3; --faint:#6e7988;
+    --line:#242b36; --line-2:#333c4a;
+    --accent:#8f95ff; --accent-ink:#10131a; --accent-soft:#232744;
+    --s0:#ff8279; --s1:#e8b243; --s2:#5fcf95;
+    --s0-bg:#2b1a1a; --s1-bg:#2a2314; --s2-bg:#152a20;
+    --ok:#5fcf95; --warn:#e8b243; --bad:#ff8279;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+  }
+
+  * { box-sizing:border-box; }
+  html, body { height:100%; }
+  body {
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:Archivo, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size:15px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap { width:100%; max-width:680px; margin:0 auto; padding-inline:16px;
+          padding-block:20px 56px; display:flex; flex-direction:column; gap:18px; }
+
+  /* ---- top bar ---- */
+  .top { display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+         justify-content:space-between; }
+  .brand { font-size:12px; font-weight:700; letter-spacing:.12em;
+           text-transform:uppercase; color:var(--faint); }
+  .sync { display:inline-flex; align-items:center; gap:7px;
+          font-family:"JetBrains Mono", ui-monospace, monospace; font-size:12px;
+          color:var(--muted); }
+  .dot { width:8px; height:8px; border-radius:50%; background:var(--faint); flex:none; }
+  .dot.ok { background:var(--ok); } .dot.busy { background:var(--warn); }
+  .dot.bad { background:var(--bad); }
+  @media (prefers-reduced-motion: no-preference) {
+    .dot.busy { animation:pulse 1.1s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  }
+
+  /* ---- buttons ---- */
+  button { font:inherit; font-weight:600; cursor:pointer; border-radius:10px;
+           border:1px solid var(--line-2); background:var(--card); color:var(--ink);
+           padding:10px 14px; transition:border-color .12s, background .12s; }
+  button:hover:not(:disabled) { border-color:var(--accent); }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+  button:focus-visible, input:focus-visible, summary:focus-visible {
+    outline:2px solid var(--accent); outline-offset:2px; }
+  .deal { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .deal button { background:var(--accent); color:var(--accent-ink);
+                 border-color:var(--accent); font-size:17px; padding:16px 14px;
+                 letter-spacing:.01em; }
+  .deal button:hover:not(:disabled) { filter:brightness(1.08); }
+  .deal button .n { display:block; font-family:"JetBrains Mono", monospace;
+                    font-size:11px; font-weight:400; opacity:.75; margin-top:3px;
+                    letter-spacing:.02em; }
+
+  /* ---- the dealt card ---- */
+  .stage { background:var(--card); border:1px solid var(--line); border-radius:16px;
+           box-shadow:var(--shadow); padding:34px 26px; text-align:center;
+           min-height:196px; display:flex; flex-direction:column;
+           justify-content:center; gap:8px; }
+  .eyebrow { font-family:"JetBrains Mono", monospace; font-size:11px;
+             letter-spacing:.1em; text-transform:uppercase; color:var(--faint); }
+  .name { font-family:Fraunces, Georgia, serif; font-weight:700;
+          font-size:clamp(30px, 7.5vw, 52px); line-height:1.08;
+          letter-spacing:-.015em; text-wrap:balance; }
+  .handle { font-family:"JetBrains Mono", monospace; font-size:14px; color:var(--muted); }
+  .stage a.repo { display:inline-block; margin-top:6px; color:var(--accent);
+                  font-weight:600; text-decoration:none;
+                  border-bottom:2px solid transparent; }
+  .stage a.repo:hover { border-bottom-color:var(--accent); }
+  .idle { color:var(--muted); font-size:16px; }
+
+  /* ---- scoring ---- */
+  .scores { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .scores button { display:flex; flex-direction:column; gap:2px; align-items:center;
+                   padding:11px 8px; }
+  .scores button .v { font-family:"JetBrains Mono", monospace; font-size:17px;
+                      font-weight:600; font-variant-numeric:tabular-nums; }
+  .scores button .l { font-size:11px; font-weight:500; color:var(--muted);
+                      letter-spacing:.01em; }
+  .scores button[data-score="0"].on { background:var(--s0-bg); border-color:var(--s0); color:var(--s0); }
+  .scores button[data-score="1"].on { background:var(--s1-bg); border-color:var(--s1); color:var(--s1); }
+  .scores button[data-score="2"].on { background:var(--s2-bg); border-color:var(--s2); color:var(--s2); }
+  .scores button.on .l { color:inherit; }
+  .util { display:flex; gap:8px; flex-wrap:wrap; }
+  .util button { flex:1 1 auto; font-weight:500; }
+  input[type=text], input[type=number], input[type=password] {
+    font:inherit; padding:10px 12px; border-radius:10px; border:1px solid var(--line-2);
+    background:var(--card); color:var(--ink); width:100%; }
+  input::placeholder { color:var(--faint); }
+
+  /* ---- progress ---- */
+  .meter { display:flex; flex-direction:column; gap:7px; }
+  .meter .row { display:flex; justify-content:space-between; gap:12px;
+                font-family:"JetBrains Mono", monospace; font-size:12px;
+                color:var(--muted); font-variant-numeric:tabular-nums; }
+  .track { height:6px; border-radius:99px; background:var(--line); overflow:hidden; }
+  .track i { display:block; height:100%; background:var(--accent); width:0;
+             transition:width .35s ease; }
+
+  /* ---- history ---- */
+  details { border-top:1px solid var(--line); padding-top:14px; }
+  summary { cursor:pointer; font-size:13px; font-weight:600; color:var(--muted); }
+  summary::marker { color:var(--faint); }
+  .tablewrap { overflow-x:auto; margin-top:12px; }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th, td { text-align:left; padding:7px 10px; border-bottom:1px solid var(--line);
+           white-space:nowrap; }
+  th { font-size:11px; letter-spacing:.07em; text-transform:uppercase;
+       color:var(--faint); font-weight:600; }
+  td.num { font-family:"JetBrains Mono", monospace; font-variant-numeric:tabular-nums; }
+  tr.void td { opacity:.42; text-decoration:line-through; }
+  .pill { display:inline-block; min-width:22px; text-align:center; padding:1px 7px;
+          border-radius:99px; font-family:"JetBrains Mono", monospace;
+          font-size:12px; font-weight:600; }
+  .pill.s0 { background:var(--s0-bg); color:var(--s0); }
+  .pill.s1 { background:var(--s1-bg); color:var(--s1); }
+  .pill.s2 { background:var(--s2-bg); color:var(--s2); }
+
+  .note-line { font-size:12px; color:var(--muted); }
+  .setup { background:var(--raise); border:1px solid var(--line); border-radius:14px;
+           padding:18px; display:flex; flex-direction:column; gap:12px; }
+  .setup h2 { margin:0; font-size:15px; }
+  .setup p { margin:0; font-size:13px; color:var(--muted); }
+  .setup code { font-family:"JetBrains Mono", monospace; font-size:12px;
+                background:var(--card); border:1px solid var(--line);
+                padding:1px 5px; border-radius:5px; }
+  .setup ol { margin:0; padding-left:20px; font-size:13px; color:var(--muted);
+              display:flex; flex-direction:column; gap:5px; }
+  .setup a { color:var(--accent); }
+  .err { color:var(--bad); font-size:13px; }
+  @media (max-width:420px) { .deal { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <span class="brand">ECON 122 &middot; spot check</span>
+    <span class="sync"><i class="dot" id="dot"></i><span id="syncText">starting</span></span>
+  </div>
+
+  <!-- first-run token setup -->
+  <section class="setup" id="setup" hidden>
+    <h2>Connect to the history repo</h2>
+    <p>This page keeps nothing of its own. The roster and every draw live in
+       <code>econ122-f26/spot-checks</code>, so any computer you open this on sees
+       the same deck.</p>
+    <ol>
+      <li>Make a <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">fine-grained token</a>.</li>
+      <li>Resource owner <code>econ122-f26</code>, and under <em>Only select repositories</em> pick <strong>spot-checks</strong> and nothing else.</li>
+      <li>Repository permissions &rarr; <strong>Contents: Read and write</strong>. Nothing else is needed.</li>
+      <li>Paste it below. It is stored only in this browser.</li>
+    </ol>
+    <input type="password" id="tok" placeholder="github_pat_..." autocomplete="off" spellcheck="false">
+    <div class="util">
+      <button id="connect">Connect</button>
+    </div>
+    <p class="err" id="setupErr" hidden></p>
+  </section>
+
+  <!-- main app -->
+  <section id="app" hidden style="display:flex;flex-direction:column;gap:18px">
+
+    <div class="deal">
+      <button data-sec="1" id="b1">Section 1<span class="n">&nbsp;</span></button>
+      <button data-sec="2" id="b2">Section 2<span class="n">&nbsp;</span></button>
+    </div>
+
+    <div class="stage" id="stage">
+      <p class="idle">Deal a section to begin.</p>
+    </div>
+
+    <div id="after" hidden style="display:flex;flex-direction:column;gap:10px">
+      <div class="scores">
+        <button class="sc" data-score="0"><span class="v">0</span><span class="l">no progress</span></button>
+        <button class="sc" data-score="1"><span class="v">1</span><span class="l">partial</span></button>
+        <button class="sc" data-score="2"><span class="v">2</span><span class="l">solid</span></button>
+      </div>
+      <input type="text" id="note" placeholder="Optional note &mdash; what they were stuck on">
+      <div class="util">
+        <button id="absent">Absent &mdash; return to deck &amp; redraw</button>
+      </div>
+    </div>
+
+    <div class="meter">
+      <div class="row">
+        <span id="progress">&nbsp;</span>
+        <span id="dayWrap">day <input type="number" id="day" min="1" max="30"
+              style="width:58px;display:inline-block;padding:3px 7px;font-size:12px"></span>
+      </div>
+      <div class="track"><i id="fill"></i></div>
+    </div>
+
+    <details id="hist">
+      <summary>History &amp; roster</summary>
+      <p class="note-line" id="rosterLine" style="margin-top:10px"></p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Date</th><th>Day</th><th>Sec</th><th>Student</th><th>Score</th><th>Note</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <div class="util" style="margin-top:12px">
+        <button id="reload">Reload from GitHub</button>
+        <button id="openCsv">Open spot_checks.csv</button>
+        <button id="forget">Forget token</button>
+      </div>
+    </details>
+
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var REPO = "econ122-f26/spot-checks";
+  var CSV_PATH = "spot_checks.csv";
+  var ROSTER_PATH = "roster.json";
+  var TOK_KEY = "econ122-spotcheck-token";
+  var API = "https://api.github.com/repos/" + REPO + "/contents/";
+
+  var $ = function (s) { return document.querySelector(s); };
+  var token = null, roster = [], synced = "", rows = [], sha = null;
+  var stagePick = null, stageSec = null, busy = false;
+
+  // ---------- storage ----------
+  function readTok() { try { return localStorage.getItem(TOK_KEY); } catch (e) { return null; } }
+  function writeTok(v) { try { v ? localStorage.setItem(TOK_KEY, v) : localStorage.removeItem(TOK_KEY); } catch (e) {} }
+
+  // ---------- base64 (utf-8 safe) ----------
+  function enc(str) {
+    var bytes = new TextEncoder().encode(str), bin = "";
+    for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin);
+  }
+  function dec(b64) {
+    var bin = atob(String(b64).replace(/\s/g, ""));
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+
+  // ---------- csv ----------
+  var COLS = ["date", "day", "sec", "round", "name", "user", "score", "note", "void"];
+  function csvEscape(v) {
+    v = (v === null || v === undefined) ? "" : String(v);
+    return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  }
+  function toCSV(list) {
+    var out = [COLS.join(",")];
+    list.forEach(function (r) {
+      out.push(COLS.map(function (c) { return csvEscape(r[c]); }).join(","));
+    });
+    return out.join("\n") + "\n";
+  }
+  function parseCSV(text) {
+    var lines = [], field = "", row = [], inQ = false;
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i];
+      if (inQ) {
+        if (ch === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else inQ = false; }
+        else field += ch;
+      } else if (ch === '"') inQ = true;
+      else if (ch === ",") { row.push(field); field = ""; }
+      else if (ch === "\n" || ch === "\r") {
+        if (ch === "\r" && text[i + 1] === "\n") i++;
+        row.push(field); lines.push(row); row = []; field = "";
+      } else field += ch;
+    }
+    if (field.length || row.length) { row.push(field); lines.push(row); }
+    if (!lines.length) return [];
+    var head = lines.shift();
+    return lines.filter(function (l) { return l.length > 1 || (l[0] || "").trim(); })
+      .map(function (l) {
+        var o = {};
+        head.forEach(function (h, j) { o[h.trim()] = l[j] === undefined ? "" : l[j]; });
+        o.round = parseInt(o.round, 10) || 1;
+        o.score = o.score === "" ? null : parseInt(o.score, 10);
+        o["void"] = String(o["void"]).toLowerCase() === "true";
+        return o;
+      });
+  }
+
+  // ---------- github ----------
+  function status(state, text) {
+    $("#dot").className = "dot " + state;
+    $("#syncText").textContent = text;
+  }
+  function gh(path, opts) {
+    opts = opts || {};
+    return fetch(API + path + (opts.method ? "" : "?ref=HEAD&t=" + Date.now()), {
+      method: opts.method || "GET",
+      headers: {
+        "Authorization": "Bearer " + token,
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28"
+      },
+      body: opts.body ? JSON.stringify(opts.body) : undefined,
+      cache: "no-store"
+    });
+  }
+
+  function loadAll() {
+    status("busy", "loading");
+    return Promise.all([gh(ROSTER_PATH), gh(CSV_PATH)]).then(function (res) {
+      if (res[0].status === 401 || res[1].status === 401) throw new Error("Token rejected (401).");
+      if (res[0].status === 404) throw new Error("roster.json not found - run sync_roster.py.");
+      if (!res[0].ok) throw new Error("roster.json: HTTP " + res[0].status);
+      return Promise.all([res[0].json(), res[1].ok ? res[1].json() : null]);
+    }).then(function (j) {
+      var r = JSON.parse(dec(j[0].content));
+      roster = r.students || [];
+      synced = r.synced || "";
+      if (j[1]) { rows = parseCSV(dec(j[1].content)); sha = j[1].sha; }
+      else { rows = []; sha = null; }
+      status("ok", "synced");
+      render();
+    });
+  }
+
+  // Write, retrying once against a fresh sha if someone else (another machine,
+  // or a hand edit on github.com) moved the file under us.
+  function persist(message) {
+    if (busy) return Promise.resolve();
+    busy = true;
+    status("busy", "saving");
+    var body = { message: message, content: enc(toCSV(rows)) };
+    if (sha) body.sha = sha;
+    return gh(CSV_PATH, { method: "PUT", body: body }).then(function (res) {
+      if (res.status === 409 || res.status === 422) {
+        return gh(CSV_PATH).then(function (r2) { return r2.json(); }).then(function (j2) {
+          sha = j2.sha;
+          var body2 = { message: message, content: enc(toCSV(rows)), sha: sha };
+          return gh(CSV_PATH, { method: "PUT", body: body2 });
+        });
+      }
+      return res;
+    }).then(function (res) {
+      if (!res.ok) throw new Error("save failed: HTTP " + res.status);
+      return res.json();
+    }).then(function (j) {
+      sha = j.content.sha;
+      status("ok", "saved");
+    }).catch(function (e) {
+      status("bad", e.message || "save failed");
+    }).then(function () { busy = false; });
+  }
+
+  // ---------- deck ----------
+  function inSec(sec) { return roster.filter(function (s) { return s.sec === sec; }); }
+  function curRound(sec) {
+    var r = rows.filter(function (d) { return d.sec === sec; }).map(function (d) { return d.round; });
+    return r.length ? Math.max.apply(null, r) : 1;
+  }
+  function pool(sec, round) {
+    var used = {};
+    rows.forEach(function (d) {
+      if (d.sec === sec && d.round === round && !d["void"]) used[d.user.toLowerCase()] = 1;
+    });
+    return inSec(sec).filter(function (s) { return !used[s.user.toLowerCase()]; });
+  }
+  function liveIdx(user) {
+    for (var i = rows.length - 1; i >= 0; i--)
+      if (rows[i].user === user && !rows[i]["void"]) return i;
+    return -1;
+  }
+
+  function deal(sec) {
+    if (!inSec(sec).length) { status("bad", "no students in section " + sec); return; }
+    var round = curRound(sec), p = pool(sec, round);
+    if (!p.length) { round += 1; p = pool(sec, round); }
+    var s = p[Math.floor(Math.random() * p.length)];
+    rows.push({
+      date: new Date().toISOString().slice(0, 10),
+      day: $("#day").value || "", sec: sec, round: round,
+      name: s.name, user: s.user, score: null, note: "", "void": false
+    });
+    stagePick = s; stageSec = sec;
+    render();
+    persist("Spot check: " + s.name + " (section " + sec + ")");
+  }
+
+  function setScore(v) {
+    if (!stagePick) return;
+    var i = liveIdx(stagePick.user);
+    if (i < 0) return;
+    rows[i].score = v;
+    rows[i].note = $("#note").value.trim();
+    render();
+    persist("Score " + v + ": " + rows[i].name);
+  }
+
+  function absent() {
+    if (!stagePick) return;
+    var i = liveIdx(stagePick.user);
+    if (i < 0) return;
+    rows[i]["void"] = true;
+    var was = rows[i].name, sec = stageSec;
+    render();
+    persist("Absent: " + was);
+    deal(sec);
+  }
+
+  // ---------- render ----------
+  function repoUrl(user) {
+    var d = $("#day").value;
+    if (!d) return null;
+    return "https://github.com/econ122-f26/econ122-f26-day" + d +
+           "-activity-" + user.toLowerCase();
+  }
+
+  function render() {
+    ["1", "2"].forEach(function (sec) {
+      var n = pool(sec, curRound(sec)).length, t = inSec(sec).length;
+      var el = document.querySelector('[data-sec="' + sec + '"] .n');
+      if (el) el.textContent = t ? n + " of " + t + " left" : "no students";
+    });
+
+    var stage = $("#stage");
+    if (stagePick) {
+      var i = liveIdx(stagePick.user);
+      var rec = i >= 0 ? rows[i] : null;
+      stage.innerHTML = "";
+      var e = document.createElement("p"); e.className = "eyebrow";
+      e.textContent = "section " + stageSec + (rec && rec.day ? " · day " + rec.day : "");
+      var n = document.createElement("p"); n.className = "name"; n.textContent = stagePick.name;
+      var h = document.createElement("p"); h.className = "handle"; h.textContent = "@" + stagePick.user;
+      stage.append(e, n, h);
+      var url = repoUrl(stagePick.user);
+      if (url) {
+        var a = document.createElement("a");
+        a.className = "repo"; a.href = url; a.target = "_blank"; a.rel = "noopener";
+        a.textContent = "Open their activity repo →";
+        stage.append(a);
+      }
+      $("#after").hidden = false;
+      document.querySelectorAll(".sc").forEach(function (b) {
+        b.classList.toggle("on", rec && rec.score !== null && +b.dataset.score === rec.score);
+      });
+    } else {
+      $("#after").hidden = true;
+    }
+
+    var sec = stageSec || "1";
+    var total = inSec(sec).length, left = pool(sec, curRound(sec)).length;
+    $("#progress").textContent = total
+      ? "section " + sec + " · round " + curRound(sec) + " · " + left + " of " + total + " left"
+      : "";
+    $("#fill").style.width = total ? (100 * (total - left) / total) + "%" : "0";
+
+    $("#rosterLine").textContent = roster.length
+      ? roster.length + " students · roster synced " + synced +
+        " · " + inSec("1").length + " in section 1, " + inSec("2").length + " in section 2"
+      : "";
+
+    var tb = $("#rows"); tb.innerHTML = "";
+    rows.slice().reverse().forEach(function (d) {
+      var tr = document.createElement("tr");
+      if (d["void"]) tr.className = "void";
+      function td(txt, cls) {
+        var x = document.createElement("td"); if (cls) x.className = cls;
+        x.textContent = txt; tr.append(x); return x;
+      }
+      td(d.date, "num"); td(d.day || "—", "num"); td(d.sec, "num"); td(d.name);
+      var sc = document.createElement("td");
+      if (d.score !== null && d.score !== undefined) {
+        var p = document.createElement("span");
+        p.className = "pill s" + d.score; p.textContent = d.score; sc.append(p);
+      } else sc.textContent = "—";
+      tr.append(sc);
+      td(d.note || "—");
+      tb.append(tr);
+    });
+  }
+
+  // ---------- wiring ----------
+  document.querySelectorAll("[data-sec]").forEach(function (b) {
+    b.addEventListener("click", function () { deal(b.dataset.sec); });
+  });
+  document.querySelectorAll(".sc").forEach(function (b) {
+    b.addEventListener("click", function () { setScore(+b.dataset.score); });
+  });
+  $("#absent").addEventListener("click", absent);
+  $("#day").addEventListener("change", render);
+  $("#reload").addEventListener("click", function () {
+    loadAll().catch(function (e) { status("bad", e.message); });
+  });
+  $("#openCsv").addEventListener("click", function () {
+    window.open("https://github.com/" + REPO + "/blob/main/" + CSV_PATH, "_blank", "noopener");
+  });
+  $("#forget").addEventListener("click", function () {
+    if (!confirm("Remove the token from this browser? Draw history stays in the repo.")) return;
+    writeTok(null); location.reload();
+  });
+  $("#connect").addEventListener("click", function () {
+    var v = $("#tok").value.trim();
+    if (!v) return;
+    token = v;
+    $("#setupErr").hidden = true;
+    loadAll().then(function () {
+      writeTok(v);
+      $("#setup").hidden = true; $("#app").hidden = false;
+    }).catch(function (e) {
+      token = null;
+      $("#setupErr").textContent = e.message;
+      $("#setupErr").hidden = false;
+      status("bad", "not connected");
+    });
+  });
+
+  // ---------- boot ----------
+  (function start() {
+    var d = new Date(), month = d.getMonth() + 1;
+    $("#day").value = "";
+    token = readTok();
+    if (!token) { $("#setup").hidden = false; status("", "not connected"); return; }
+    $("#app").hidden = false;
+    loadAll().catch(function (e) {
+      status("bad", e.message);
+      $("#app").hidden = true; $("#setup").hidden = false;
+      $("#setupErr").textContent = e.message; $("#setupErr").hidden = false;
+    });
+  })();
+})();
+</script>
+
+</body>
+</html>
