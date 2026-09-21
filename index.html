@@ -148,7 +148,8 @@
   th { font-size:11px; letter-spacing:.07em; text-transform:uppercase;
        color:var(--faint); font-weight:600; }
   td.num { font-family:"JetBrains Mono", monospace; font-variant-numeric:tabular-nums; }
-  tr.void td { opacity:.42; text-decoration:line-through; }
+  tr.absent-row td { opacity:.58; }
+  .pill.absent { background:var(--line); color:var(--muted); font-weight:500; }
   .pill { display:inline-block; min-width:22px; text-align:center; padding:1px 7px;
           border-radius:99px; font-family:"JetBrains Mono", monospace;
           font-size:12px; font-weight:600; }
@@ -282,7 +283,7 @@
   }
 
   // ---------- csv ----------
-  var COLS = ["date", "day", "sec", "round", "name", "user", "score", "note", "void"];
+  var COLS = ["date", "day", "sec", "round", "name", "user", "score", "note", "absent"];
   function csvEscape(v) {
     v = (v === null || v === undefined) ? "" : String(v);
     return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
@@ -317,7 +318,10 @@
         head.forEach(function (h, j) { o[h.trim()] = l[j] === undefined ? "" : l[j]; });
         o.round = parseInt(o.round, 10) || 1;
         o.score = o.score === "" ? null : parseInt(o.score, 10);
-        o["void"] = String(o["void"]).toLowerCase() === "true";
+        // "void" was this column's old name; read either.
+        var flag = o.absent !== undefined ? o.absent : o["void"];
+        o.absent = String(flag).toLowerCase() === "true";
+        delete o["void"];
         return o;
       });
   }
@@ -388,7 +392,12 @@
   }
 
   // ---------- deck ----------
-  function inSec(sec) { return roster.filter(function (s) { return s.sec === sec; }); }
+  // Excluded students (remote, auditing) stay in roster.json for the record
+  // but never enter a deck.
+  function inSec(sec) {
+    return roster.filter(function (s) { return s.sec === sec && !s.skip; });
+  }
+  function excluded() { return roster.filter(function (s) { return s.skip; }); }
   function curRound(sec) {
     var r = rows.filter(function (d) { return d.sec === sec; }).map(function (d) { return d.round; });
     return r.length ? Math.max.apply(null, r) : 1;
@@ -396,13 +405,13 @@
   function pool(sec, round) {
     var used = {};
     rows.forEach(function (d) {
-      if (d.sec === sec && d.round === round && !d["void"]) used[d.user.toLowerCase()] = 1;
+      if (d.sec === sec && d.round === round && !d.absent) used[d.user.toLowerCase()] = 1;
     });
     return inSec(sec).filter(function (s) { return !used[s.user.toLowerCase()]; });
   }
   function liveIdx(user) {
     for (var i = rows.length - 1; i >= 0; i--)
-      if (rows[i].user === user && !rows[i]["void"]) return i;
+      if (rows[i].user === user && !rows[i].absent) return i;
     return -1;
   }
 
@@ -414,7 +423,7 @@
     rows.push({
       date: new Date().toISOString().slice(0, 10),
       day: $("#day").value || "", sec: sec, round: round,
-      name: s.name, user: s.user, score: null, note: "", "void": false
+      name: s.name, user: s.user, score: null, note: "", absent: false
     });
     stagePick = s; stageSec = sec;
     render();
@@ -435,11 +444,12 @@
     if (!stagePick) return;
     var i = liveIdx(stagePick.user);
     if (i < 0) return;
-    rows[i]["void"] = true;
+    rows[i].absent = true;
+    rows[i].note = $("#note").value.trim() || "absent";
     var was = rows[i].name, sec = stageSec;
     render();
     persist("Absent: " + was);
-    deal(sec);
+    deal(sec);   // their turn is not spent - they go back in the deck
   }
 
   // ---------- render ----------
@@ -489,22 +499,29 @@
       : "";
     $("#fill").style.width = total ? (100 * (total - left) / total) + "%" : "0";
 
+    var ex = excluded();
     $("#rosterLine").textContent = roster.length
-      ? roster.length + " students · roster synced " + synced +
-        " · " + inSec("1").length + " in section 1, " + inSec("2").length + " in section 2"
+      ? inSec("1").length + " in section 1, " + inSec("2").length +
+        " in section 2 · roster synced " + synced +
+        (ex.length ? " · never drawn: " + ex.map(function (s) {
+           return s.name + " (" + (s.skip === true ? "excluded" : s.skip) + ")";
+         }).join(", ") : "")
       : "";
 
     var tb = $("#rows"); tb.innerHTML = "";
     rows.slice().reverse().forEach(function (d) {
       var tr = document.createElement("tr");
-      if (d["void"]) tr.className = "void";
+      if (d.absent) tr.className = "absent-row";
       function td(txt, cls) {
         var x = document.createElement("td"); if (cls) x.className = cls;
         x.textContent = txt; tr.append(x); return x;
       }
       td(d.date, "num"); td(d.day || "—", "num"); td(d.sec, "num"); td(d.name);
       var sc = document.createElement("td");
-      if (d.score !== null && d.score !== undefined) {
+      if (d.absent) {
+        var pa = document.createElement("span");
+        pa.className = "pill absent"; pa.textContent = "absent"; sc.append(pa);
+      } else if (d.score !== null && d.score !== undefined) {
         var p = document.createElement("span");
         p.className = "pill s" + d.score; p.textContent = d.score; sc.append(p);
       } else sc.textContent = "—";
