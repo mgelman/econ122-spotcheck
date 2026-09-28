@@ -227,7 +227,9 @@
       <div class="row">
         <span id="progress">&nbsp;</span>
         <span id="dayWrap">day <input type="number" id="day" min="1" max="30"
-              style="width:58px;display:inline-block;padding:3px 7px;font-size:12px"></span>
+              style="width:58px;display:inline-block;padding:3px 7px;font-size:12px">
+          <button id="dayGo" type="button"
+                  style="padding:3px 9px;font-size:12px;border-radius:7px">Update link</button></span>
       </div>
       <div class="track"><i id="fill"></i></div>
     </div>
@@ -430,6 +432,22 @@
     persist("Spot check: " + s.name + " (section " + sec + ")");
   }
 
+  // Re-point the repo link at the day in the box. If someone is on stage,
+  // also correct the day saved in their record so the history matches.
+  function applyDay() {
+    var d = $("#day").value;
+    if (stagePick) {
+      var i = liveIdx(stagePick.user);
+      if (i >= 0 && d && rows[i].day !== d) {
+        rows[i].day = d;
+        render();
+        persist("Day " + d + ": " + rows[i].name);
+        return;
+      }
+    }
+    render();
+  }
+
   function setScore(v) {
     if (!stagePick) return;
     var i = liveIdx(stagePick.user);
@@ -560,7 +578,9 @@
     b.addEventListener("click", function () { setScore(+b.dataset.score); });
   });
   $("#absent").addEventListener("click", absent);
-  $("#day").addEventListener("change", render);
+  $("#day").addEventListener("input", render);     // link follows as you type
+  $("#day").addEventListener("change", applyDay);  // Enter or leaving the box
+  $("#dayGo").addEventListener("click", applyDay);
   $("#reload").addEventListener("click", function () {
     loadAll().catch(function (e) { status("bad", e.message); });
   });
